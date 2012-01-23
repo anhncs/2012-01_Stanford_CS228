@@ -40,7 +40,7 @@
 
 \begin{document}
 
-\title{Stats 315a: Statistical Learning \\ Problem Set 1}
+\title{CS 228: Probabilistic Graphical Models \\ Problem Set 1}
 \author{Dong-Bang Tsai}
     \email{dbtsai@stanford.edu}
 \affiliation{Department of Applied Physics, Stanford University, Stanford, California 94305, USA}
@@ -54,21 +54,22 @@
 \section*{Problem 1}
 \subsection*{(a)}
 
+Assuming that $P(S'=s^j|S=s^i)=f_{ij}$ is the transition model in time duration $\Delta t$, then the  probability of HMM with transition model $f$ form $t$ to $d_i$ such that at step $d_i$, the state first transitions out of state $s^i$ will be
+\begin{align}
+P(S^{(t+d_i)} \neq s^i |  S^t=s^i) = f_{ii}^{(\frac{d_i}{\Delta t}-1)}(1-f_{ii})
+\end{align}
+In order to ease the notation, we can define that in $j-th$ step, the probability that the sate is not stayed in $s^i$ is 
+\begin{align}
+P(d_i=j|  S^t=s^i) = f_{ii}^{(j-1)}(1-f_{ii})
+\end{align}
 
-\section*{Problem 2}
-\subsection*{(a)}
+\subsection*{(b)}
 
-\section*{Problem 3}
-\subsection*{(a)}
+\subsection*{(c)}
 
-\section*{Problem 4}
-\subsection*{(a)}
+\subsection*{(d)}
 
-\section*{Problem 5}
-\subsection*{(a)}
-
-\section*{Problem 6}
-\subsection*{(a)}
+\subsection*{(e)}
 
 
 
