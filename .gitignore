@@ -1,3 +1,6 @@
+*.aux
+*.synctex.gz
+*.log
 *.pyc
 *.swp
 *.swo
