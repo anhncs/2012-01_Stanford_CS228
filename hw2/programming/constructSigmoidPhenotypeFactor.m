@@ -79,7 +79,4 @@ for i=1:size(phenotypeFactor.val,1)/2
     phenotypeFactor = SetValueOfAssignment(phenotypeFactor,assignment,1-p);
 end
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

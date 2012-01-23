@@ -34,7 +34,7 @@ phenotypeFactor = struct('var', [], 'card', [], 'val', []);
 
 % Fill in phenotypeFactor.var.
 phenotypeFactor.var = [phenotypeVar, genotypeVar];
-n_size = size(alphaList,1);
+n_size = length(alphaList);
 % Fill in phenotypeFactor.card.
 phenotypeFactor.card = [2, n_size];
 
