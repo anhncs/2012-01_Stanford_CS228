@@ -20,6 +20,14 @@ function A = MaxDecoding( M )
 % YOUR CODE HERE
 % Compute the best assignment for variables in the network.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+N=length(M);
+
+for i=1:N
+    [dummy indx]=max(M(i).val);
+    assignment=IndexToAssignment(indx, M(i).card);
+    k=M(i).var;
+    A(k)=assignment;
+end
 
 end
 

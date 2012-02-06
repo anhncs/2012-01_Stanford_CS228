@@ -31,14 +31,83 @@ MESSAGES = repmat(struct('var', [], 'card', [], 'val', []), N, N);
 %
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if(isMax==0)
+[i j]=GetNextCliques(P, MESSAGES);
 
+while (i~=0)
+    V=setdiff(P.cliqueList(i).var,P.cliqueList(j).var);
+    factor=P.cliqueList(i);
+    
+    indx=setdiff(find(P.edges(:,i)),j);
+    for k=1:length(indx)
+                factor=FactorProduct(factor, MESSAGES(indx(k),i));
+    end
+    
+    MESSAGES(i,j)=FactorMarginalization(factor, V);
+    MESSAGES(i,j).val=MESSAGES(i,j).val./sum(MESSAGES(i,j).val);
+    
+    [i j]=GetNextCliques(P, MESSAGES);
+end
+    
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
 %
 % Now the clique tree has been calibrated. 
 % Compute the final potentials for the cliques and place them in P.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for i=1:N
+    factor=P.cliqueList(i);
+    for j=1:N
+        factor=FactorProduct(factor, MESSAGES(j,i));
+    end
+    P.cliqueList(i)=factor;
+end
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+else if(isMax==1)
+    
+    [i j]=GetNextCliques(P, MESSAGES);
+
+while (i~=0)
+    
+    factor=P.cliqueList(i);
+    factor.val=log(factor.val);
+    
+    indx=P.edges(i,:);
+    
+        for k=1:N
+            if(indx(k)==0||k==j)
+                continue;
+            end
+                factor=FactorSum(factor, MESSAGES(k,i));
+        end
+ 
+    V=setdiff(factor.var,P.cliqueList(j).var);
+    MESSAGES(i,j)=FactorMaxMarginalization(factor, V);
+    
+    [i j]=GetNextCliques(P, MESSAGES);
+end
+
+for i=1:N
+    factor=P.cliqueList(i);
+    factor.val=log(factor.val);
+    
+    indx=P.edges(i,:);
+    
+        for k=1:N
+            if(indx(k)==0)
+                continue;
+            end
+                factor=FactorSum(factor,MESSAGES(k,i));
+        end
+    
+    P.cliqueList(i)=factor;
+end
+
+    end
+end
 
 return

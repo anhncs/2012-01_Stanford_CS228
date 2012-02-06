@@ -35,6 +35,21 @@ P.cliqueList = repmat(struct('var', [], 'card', [], 'val', []), N, 1);
 % Then use that assignment to initialize the cliques in cliqueList to 
 % their initial potentials. 
 
+for i=1:length(C.factorList)
+    for j=1:N
+        if (all(ismember(C.factorList(i).var,C.nodes{j})))
+            if(isempty(P.cliqueList(j).var))
+                P.cliqueList(j).var=C.factorList(i).var;
+                P.cliqueList(j).card=C.factorList(i).card;
+                P.cliqueList(j).val=ones(size(C.factorList(i).val));
+            end
+            P.cliqueList(j)=FactorProduct(P.cliqueList(j), C.factorList(i));       
+            break;
+        end
+    end
+end
+
+P.edges=C.edges;
 % Hint: C.nodes is a list of cliques.
 % P.cliqueList(i).var = C.nodes{i};
 % Print out C to get a better understanding of its structure.

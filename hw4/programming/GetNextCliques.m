@@ -29,7 +29,38 @@ function [i, j] = GetNextCliques(P, messages)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+N=length(P.cliqueList);
+for i=1:N
+    for j=1:N
+        if (P.edges(i,j)==0)   %There is no edge between i and j
+            continue;
+        else if(~isempty(messages(i,j).var)) %i has alreay passed message to j
+                continue;
+            end
+        end
+         
+        indx=setdiff(find(P.edges(i,:)),j);
+        
+        if(isempty(indx))
+            return;
+        end
+        
+        for k=1:length(indx)
+            if (isempty(messages(indx(k),i).var))  %the clique hasn't got all other messages
+                k=k-1;
+                break;
+            end
+        end
+        
+        if (k==length(indx))   %the clique is ready
+            return;
+        end
+        
+       
+    end
+end
+i=0;
+j=0;
 
 
 return;

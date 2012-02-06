@@ -35,7 +35,7 @@ end;
 
 % Initialize B.card and B.val
 B.card = A.card(mapB);
-B.val = zeros(1,prod(B.card));
+B.val = -Inf(1,prod(B.card));
 
 % Compute some helper indices
 % These will be very useful for calculating C.val
@@ -47,6 +47,9 @@ indxB = AssignmentToIndex(assignments(:, mapB), B.card);
 % YOUR CODE HERE
 % Correctly populate the factor values of B
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for i = 1:length(A.val)
+        B.val(indxB(i)) = max(B.val(indxB(i)),A.val(i));
+end;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
