@@ -967,8 +967,8 @@ end
 
 
 function [login password] = basicPrompt()
-  login = input('Login (Email address): ', 's');
-  password = input('Submission Password (from Assignments page): ', 's');
+  login = 'dbtsai@stanford.edu';
+  password = 'Whp65Rrtgs';
 end
 
 function [login password] = quickLogin(login,password)
