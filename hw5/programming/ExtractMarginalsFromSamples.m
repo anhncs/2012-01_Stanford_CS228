@@ -22,5 +22,12 @@ end
 % Populate M so that M(i) contains the marginal probability over
 % variable i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+n_sample = length(collection_indx);
 
+for i = 1:length(G.names)
+    for j=1:M(i).card - 1
+        M(i).val(j) = length(find(collected_samples(:,i)==j))/n_sample;
+    end
+    M(i).val(M(i).card) = 1.0- sum(M(i).val);
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

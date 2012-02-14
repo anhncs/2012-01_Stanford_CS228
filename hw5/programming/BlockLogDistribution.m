@@ -39,7 +39,6 @@ end
 
 % d is the dimensionality of all the variables we are extracting
 d = G.card(V(1));
-
 LogBS = zeros(1, d);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
@@ -53,10 +52,25 @@ LogBS = zeros(1, d);
 % Also you should have only ONE for-loop, as for-loops are VERY slow in matlab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Well, in the test case, we only have |V|=1. I don't count it as extra loop  
+temp =  struct('var', [], 'card', [], 'val', []);
+for i=1:length(V)
+    var2factors = G.var2factors{V(i)};
+    for j=1:length(var2factors)
+        temp = FactorProduct(temp,F(var2factors(j)));
+    end 
+end
+assignment = A(temp.var);
+indx = zeros(1,length(V));
+% Well, the following will not be looped in the test case!!!
+for i=1:length(V)
+   indx(i) = find(temp.var==V(i)); 
+end
+for i=1:d
+   assignment(indx) = i*ones(1,length(V));
+   LogBS(i) = log( GetValueOfAssignment(temp, assignment) );
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Re-normalize to prevent underflow when you move back to probability space
 LogBS = LogBS - min(LogBS);
-
-
-

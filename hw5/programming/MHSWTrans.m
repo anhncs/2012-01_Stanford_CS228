@@ -9,7 +9,7 @@
 %  variant - a number (1 or 2) indicating the variant of Swendsen-Wang to use.  In variant 1,
 %            all the q_{i,j}'s are equal
 function A = MHSWTrans(A, G, F, variant)
-
+save('/home/dbtsai/temp.mat','A','G','F','variant');
 %%%%%%%%%%%%%% Get Proposal %%%%%%%%%%%%%%
 % Prune edges from q_list if the nodes don't have the same current value
 q_list = G.q_list;
@@ -44,7 +44,7 @@ if variant == 1
     % Specify the log of the distribution (LogR) from 
     % which a new label for Y is selected for variant 1 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    LogR = log (ones (1,d) / d);  
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif variant == 2
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,7 +56,7 @@ elseif variant == 2
     % before implementing this, one of the generated
     % data structures may be useful in implementing this section
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+ LogR = BlockLogDistribution (selected_vars, G, F, A);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     disp('WARNING: Unrecognized Swendsen-Wang Variant');
@@ -92,7 +92,13 @@ p_acceptance = 0.0;
 % of variables, as well as some ratios used in computing
 % the acceptance probabilitiy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+Accept = exp (LogR (old_value) - LogR (new_value) + log_QY_ratio);
+for i = 1:length (F) 
+    v = GetValueOfAssignment (F (i), A (F (i).var));
+    vpre = GetValueOfAssignment (F (i), A_prop (F (i).var));
+    Accept = Accept * vpre / v;
+end;
+p_acceptance = min(Accept,1.0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Accept or reject proposal

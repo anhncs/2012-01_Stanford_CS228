@@ -117,8 +117,9 @@ for i = 1:max_iter
     %     is equivalent to
     %     foo2 = @foo;
     %     sol = foo2(bar);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    A = Trans(A, G, F);
+    all_samples(i+1,:) = A;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
@@ -129,8 +130,8 @@ M=[];
 % final marginals M
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
+collection_indx = (mix_time+1) + sampling_interval*(0:num_samples);
+M = ExtractMarginalsFromSamples(G, all_samples, collection_indx);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
