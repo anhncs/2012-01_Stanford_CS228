@@ -52,24 +52,19 @@ LogBS = zeros(1, d);
 % Also you should have only ONE for-loop, as for-loops are VERY slow in matlab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Well, in the test case, we only have |V|=1. I don't count it as extra loop  
-temp =  struct('var', [], 'card', [], 'val', []);
-for i=1:length(V)
-    var2factors = G.var2factors{V(i)};
-    for j=1:length(var2factors)
-        temp = FactorProduct(temp,F(var2factors(j)));
-    end 
+Factors=unique([G.var2factors{V}]);
+Nf=length(Factors);
+
+for i=1:Nf
+    FactorIn=F(Factors(i));
+    C=setdiff(FactorIn.var, V);
+    E=[C' A(C)'];
+    FactorIn = ObserveEvidence(FactorIn, E);
+    FactorIn = FactorMarginalization(FactorIn, C);
+    AssignmentIndx=(1:d)'*ones(1,length(FactorIn.var));
+    LogBS=LogBS+log(GetValueOfAssignment(FactorIn,AssignmentIndx));
 end
-assignment = A(temp.var);
-indx = zeros(1,length(V));
-% Well, the following will not be looped in the test case!!!
-for i=1:length(V)
-   indx(i) = find(temp.var==V(i)); 
-end
-for i=1:d
-   assignment(indx) = i*ones(1,length(V));
-   LogBS(i) = log( GetValueOfAssignment(temp, assignment) );
-end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Re-normalize to prevent underflow when you move back to probability space

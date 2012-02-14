@@ -56,7 +56,7 @@ elseif variant == 2
     % before implementing this, one of the generated
     % data structures may be useful in implementing this section
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- LogR = BlockLogDistribution (selected_vars, G, F, A);
+    LogR = BlockLogDistribution (selected_vars, G, F, A);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     disp('WARNING: Unrecognized Swendsen-Wang Variant');
@@ -82,7 +82,6 @@ for i = 1:size(G.q_list, 1)  % Iterate through *all* edges, not just the ones we
     end
 end
 
-p_acceptance = 0.0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
 % Compute acceptance probability
@@ -92,13 +91,11 @@ p_acceptance = 0.0;
 % of variables, as well as some ratios used in computing
 % the acceptance probabilitiy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Accept = exp (LogR (old_value) - LogR (new_value) + log_QY_ratio);
+log_accept  = (LogR(old_value) - LogR(new_value) + log_QY_ratio);
 for i = 1:length (F) 
-    v = GetValueOfAssignment (F (i), A (F (i).var));
-    vpre = GetValueOfAssignment (F (i), A_prop (F (i).var));
-    Accept = Accept * vpre / v;
-end;
-p_acceptance = min(Accept,1.0);
+    log_accept = log_accept + log(GetValueOfAssignment (F (i), A_prop (F (i).var))) - log(GetValueOfAssignment (F (i), A (F (i).var)));
+end
+p_acceptance = min(1.0,exp(log_accept));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Accept or reject proposal

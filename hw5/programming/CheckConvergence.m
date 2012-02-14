@@ -14,7 +14,7 @@
 %
 %
 
-function converged = CheckConvergence(mNew, mOld);
+function converged = CheckConvergence(mNew, mOld)
 
 thresh = 1.0e-6;
 %converged should be 1 if converged, 0 otherwise.
@@ -23,9 +23,17 @@ thresh = 1.0e-6;
 % YOUR CODE HERE
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
+[M N]=size(mNew);
+for i=1:M
+    for j=1:N
+        diff=max(abs(mNew(i,j).val-mOld(i,j).val));
+        C=max(diff);
+        if(C>thresh)
+            converged=0;
+            return;
+        end
+    end
+end
+converged=1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 return;

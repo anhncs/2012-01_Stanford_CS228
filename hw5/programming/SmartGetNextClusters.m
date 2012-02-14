@@ -26,7 +26,21 @@ function [i j] = SmartGetNextClusters(P,Messages,oldMessages,m)
     % The 'find' function may be useful
     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    global BPorder;
+    [row,col] = find(P.edges~=0);
+    N = length(row);
+    if(mod(m,N)==1)
+        diff = zeros(1,N);
+        for k=1:N
+            ix1 = row(k);
+            ix2 = col(k);
+            diff(k) = max(abs(Messages(ix1,ix2).val-oldMessages(ix1,ix2).val));
+        end
+        [B BPorder]=sort(diff,'ascend');
+    end
+    indx=BPorder(mod(m-1,N)+1);
+    i=row(indx);
+    j=col(indx);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end

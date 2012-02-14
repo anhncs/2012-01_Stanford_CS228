@@ -33,8 +33,27 @@ end;
 % YOUR CODE HERE
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
+N=length(F);
+Variable=[];
+for i=1:N
+    Variable=union(Variable,F(i).var);
+end
+Nv=length(Variable);
+Variable=zeros(Nv,1);
+for i=1:Nv
+    Variable(i)=F(i).var;
+end
+P.clusterList = repmat(struct('var', [], 'card', [], 'val', []), 1, N);
+P.edges=zeros(N,N);
+for i=1:N
+    P.clusterList(i)=F(i);    
+    if(i>Nv)
+        [dummy, dummy, indx] = intersect(F(i).var, Variable);
+        for j=1:length(indx)        
+                P.edges(i,indx(j))=1;
+                P.edges(indx(j),i)=1;
+        end
+    end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
