@@ -15,7 +15,26 @@ function EUF = CalculateExpectedUtilityFactor( I )
   % YOUR CODE HERE...
   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-
-
-  
+    F = I.RandomFactors;
+    U = I.UtilityFactors(1);
+    
+    % All the indices of factors without a joint assignment 
+    % to the parents of D, D, and U.
+    indx_All_without_PaD_and_U = unique([I.RandomFactors(:).var I.DecisionFactors(1).var I.UtilityFactors(1).var]);
+    indx_All_without_PaD_and_U(ismember(indx_All_without_PaD_and_U, [I.DecisionFactors(1).var U.var]))=[];
+ 
+    F_new_list = VariableElimination(F, indx_All_without_PaD_and_U, []);
+    temp = struct('var', [], 'card', [], 'val', []);
+    for i=1:length(F_new_list)
+          temp = FactorProduct(temp,F_new_list(i));
+    end   
+    temp =  FactorProduct(U,temp );
+    indx_sum = temp.var;
+    indx_sum(ismember(indx_sum, I.DecisionFactors(1).var))=[];
+    
+    EUF_list = VariableElimination(temp,indx_sum,[]);
+    EUF = struct('var', [], 'card', [], 'val', []);
+    for i=1:length(EUF_list)
+          EUF = FactorProduct(EUF,EUF_list(i));
+    end   
 end  

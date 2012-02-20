@@ -17,6 +17,11 @@ function [MEU OptimalDecisionRule] = OptimizeWithJointUtility( I )
   % YOUR CODE HERE
   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  
+    U = struct('var', [], 'card', [], 'val', []);
+    for i=1:length(I.UtilityFactors)
+          U = FactorSum(U,I.UtilityFactors(i));
+    end
+    Inew = I;
+    Inew.UtilityFactors = U;
+    [MEU OptimalDecisionRule] = OptimizeMEU( Inew );
 end

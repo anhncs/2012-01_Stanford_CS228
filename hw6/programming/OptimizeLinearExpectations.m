@@ -23,8 +23,31 @@ function [MEU OptimalDecisionRule] = OptimizeLinearExpectations( I )
   % a degenerate case we can handle separately for convenience.
   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-
-
-
+    D = I.DecisionFactors(1);
+    EUF = struct('var', [], 'card', [], 'val', []);
+    for i=1:length(I.UtilityFactors)
+        Inew = I;
+        Inew.UtilityFactors = I.UtilityFactors(i);
+        EUF = FactorSum(EUF, CalculateExpectedUtilityFactor( Inew ));
+    end    
+    OptimalDecisionRule = D;
+    OptimalDecisionRule.val = 0*D.val;
+    MEU = 0;
+    n = length(OptimalDecisionRule.val)/OptimalDecisionRule.card(1);
+    for i=1:n
+        [val, indx_temp] = max(EUF.val((i-1)*n + 1:(i-1)*n + n));
+        MEU = MEU + val;
+        indx = indx_temp + (i-1)*n;
+        OptimalDecisionRule = SetValueOfAssignment(OptimalDecisionRule, IndexToAssignment(indx, OptimalDecisionRule.card), 1);
+    end
+    
+  % Quiz Q6
+%   TestI0.RandomFactors(10).card=[3 2]
+%   TestI0.RandomFactors(10).val=zeros(1,6);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [1 1], 0.999);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [1 2], 0.75);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [2 1], 0.75);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [2 2], 0.999);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [3 1], 0.999);
+%   TestI0.RandomFactors(10) = SetValueOfAssignment( TestI0.RandomFactors(10), [3 2], 0.999);
 end
