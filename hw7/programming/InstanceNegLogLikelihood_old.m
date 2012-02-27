@@ -43,6 +43,7 @@ function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
     % have to understand how this code works. (It's complicated.)
     
     featureSet = GenerateAllFeatures(X, y, modelParams);
+    %featureSet = GenerateAllFeatures(sampleX, sampleY, sampleModelParams);
 
     % Use the featureSet to calculate nll and grad.
     % This is the main part of the assignment, and it is very tricky - be careful!
@@ -75,27 +76,38 @@ function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
         for j=1:length(featureSet.features(i).var)
             indicator = indicator*( y(featureSet.features(i).var(j)) == featureSet.features(i).assignment(j) );
         end
-        nll = nll - theta(featureSet.features(i).paramIdx) * indicator;       
+        nll = nll - theta(featureSet.features(i).paramIdx)*indicator;       
         grad(featureSet.features(i).paramIdx) = grad(featureSet.features(i).paramIdx) - indicator;
-        
         % Start to construct the uncalibratedTree
-        % P = exp(sum_i theta_i*f_i)
         
-        % This is the factor of two adjacent variable
-        if(length(featureSet.features(i).var)==2)
-            indx_clique = min(featureSet.features(i).var);
-            assignment = featureSet.features(i).assignment;
-        elseif(featureSet.features(i).var(1)>1)
-            indx_clique=featureSet.features(i).var(1)-1;
-            AssignmentLength=UncalibratedTree.cliqueList(indx_clique).card(1);
-            assignment=[(1:AssignmentLength)' ones(AssignmentLength,1)*featureSet.features(i).assignment];
+        Current_Feature=featureSet.features(i);        
+        %find the clique index corresponding to this feature
+        if(length(Current_Feature.var)==2)
+            CliqueIndx=Current_Feature.var(1);
+            %find the index of theat corresponding to this feature
+            Para=theta(Current_Feature.paramIdx);
+            %locate the entry which the feature have effect on
+            ValIndx=AssignmentToIndex(Current_Feature.assignment, UncalibratedTree.cliqueList(CliqueIndx).card);
+            UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)=UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)*exp(Para);
+        elseif(Current_Feature.var(1)>1)
+            CliqueIndx=Current_Feature.var(1)-1;
+            %find the index of theat corresponding to this feature
+            Para=theta(Current_Feature.paramIdx);
+            %locate the entry which the feature have effect on
+            AssignmentLength=UncalibratedTree.cliqueList(CliqueIndx).card(1);
+            Assignment=[(1:AssignmentLength)' ones(AssignmentLength,1)*Current_Feature.assignment];
+            ValIndx=AssignmentToIndex(Assignment, UncalibratedTree.cliqueList(CliqueIndx).card);
+            UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)=UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)*exp(Para);
          else
-            indx_clique=featureSet.features(i).var(1);
-            AssignmentLength=UncalibratedTree.cliqueList(indx_clique).card(1);
-            assignment=[ones(AssignmentLength,1)*featureSet.features(i).assignment (1:AssignmentLength)'];
-        end
-         indx = AssignmentToIndex(assignment, UncalibratedTree.cliqueList(indx_clique).card);
-         UncalibratedTree.cliqueList(indx_clique).val(indx) = UncalibratedTree.cliqueList(indx_clique).val(indx)*exp(theta(featureSet.features(i).paramIdx));
+                CliqueIndx=Current_Feature.var(1);
+            %find the index of theat corresponding to this feature
+            Para=theta(Current_Feature.paramIdx);
+            %locate the entry which the feature have effect on
+            AssignmentLength=UncalibratedTree.cliqueList(CliqueIndx).card(1);
+            Assignment=[ones(AssignmentLength,1)*Current_Feature.assignment (1:AssignmentLength)'];
+            ValIndx=AssignmentToIndex(Assignment, UncalibratedTree.cliqueList(CliqueIndx).card);
+            UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)=UncalibratedTree.cliqueList(CliqueIndx).val(ValIndx)*exp(Para);
+         end
     end
     [CalibratedTree, logZ] = CliqueTreeCalibrate(UncalibratedTree, 0);
     nll = nll +logZ;
@@ -112,7 +124,7 @@ function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
     ModelFeatureCounts = zeros(1, length(theta));
     MarginalSingle = cell(1, N);
     MarginalPair = cell(1, N-1);
-    for i = 1:length(y)
+    for i = 1:N
         CliqueIndx=max(i-1,1);
         MarginalSingle{i} = FactorMarginalization(CalibratedTree.cliqueList(CliqueIndx),setdiff(CalibratedTree.cliqueList(CliqueIndx).var, i));
         MarginalSingle{i}.val = MarginalSingle{i}.val / sum(MarginalSingle{i}.val);
@@ -121,6 +133,7 @@ function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
             MarginalPair{i}.val = MarginalPair{i}.val / sum(MarginalPair{i}.val);
         end
     end
+    
     for i = 1:length(theta) 
         for j = 1:length(FeatureToPara{i})
             idx = FeatureToPara{i}(j);
@@ -133,7 +146,8 @@ function [nll, grad] = InstanceNegLogLikelihood(X, y, theta, modelParams)
                 ModelFeatureCounts(i) = ModelFeatureCounts(i) + v;
             end       
         end
-    end    
+    end
+    
     grad = grad + ModelFeatureCounts;
 end
 
