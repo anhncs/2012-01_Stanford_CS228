@@ -114,7 +114,14 @@ function [P, logZ] = CliqueTreeCalibrate(P, isMax)
     % logZ, the log of the partition function.
     if (doLogZ)
         %%% YOUR CODE HERE:
-        logZ = 0; % remove this
+        % Well the first nozeor edges, and get the forward and backward
+        % message. Summing over the product of two factors will give us
+        % normalization constant. 
+        [row, col]= find(P.edges);
+        delta_forward  = unnormalizedMessages(row(1),col(1));
+        delta_backward = unnormalizedMessages(col(1),row(1));
+        Joint_factor = FactorProduct(delta_forward, delta_backward);
+        logZ = log(sum(Joint_factor.val));
     else
         logZ = 0;
     end
