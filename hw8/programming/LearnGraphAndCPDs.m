@@ -25,11 +25,14 @@ for k=1:K
     %%%%%%%%%%%%%%%%%%%%%%%%%
     % YOUR CODE HERE
     %%%%%%%%%%%%%%%%%%%%%%%%%
+    indx = find(labels(:,k));
+    [A W] = LearnGraphStructure(dataset(indx,:,:));
+    G(:,:,k) = ConvertAtoG(A);
 end
 
 % estimate parameters
 
-P.c = zeros(1,K);
+% P.c = zeros(1,K);
 % compute P.c
 
 % the following code can be copied from LearnCPDsGivenGraph.m
@@ -37,5 +40,6 @@ P.c = zeros(1,K);
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[P loglikelihood] = LearnCPDsGivenGraph(dataset, G, labels);
 
-fprintf('log likelihood: %f\n', loglikelihood);
+%fprintf('log likelihood: %f\n', loglikelihood);

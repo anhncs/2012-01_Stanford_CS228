@@ -46,7 +46,7 @@ for i=1:size(dataset,2)
             end
         elseif length(size(G)) == 3
             if G(i,1,j) > 0
-                pNode = G(j,2,j);
+                pNode = G(i,2,j);
                 condition = 1;
             end
         end

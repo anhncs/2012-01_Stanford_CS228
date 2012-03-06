@@ -53,7 +53,10 @@ for i=1:N
                                     + lognormpdf(dataset(i,j,3), mu_angle, P.clg(j).sigma_angle(m));
         end
     end
-    loglikelihood = loglikelihood + log(sum(exp(logProb)));
+    [val, indx] = max(logProb);
+    if labels(i, indx) == 1
+        accuracy = accuracy + 1;
+    end
 end
-
+accuracy = accuracy/N;
 %fprintf('Accuracy: %.2f\n', accuracy);
