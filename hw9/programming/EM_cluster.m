@@ -45,7 +45,40 @@ for iter=1:maxIter
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % YOUR CODE HERE
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+ P.c=mean(ClassProb,1);
+ P.clg = repmat(struct('mu_y',[],'sigma_y',[],'mu_x',[],'sigma_x',[],'mu_angle',[],'sigma_angle',[],'theta',[]), 1, size(poseData,2));
+ 
+for j = 1:size(poseData,2)
+    for k=1:K
+        Weight=ClassProb(:,k);
+        Y = poseData(:,j,1);
+        X = poseData(:,j,2);
+        Angle = poseData(:,j,3);   
+        if (G(j,1) == 0) 
+            [P.clg(j).mu_y(k) P.clg(j).sigma_y(k)] = FitGaussianParameters(Y,Weight);
+            [P.clg(j).mu_x(k) P.clg(j).sigma_x(k)] = FitGaussianParameters(X,Weight);
+            [P.clg(j).mu_angle(k) P.clg(j).sigma_angle(k)] = FitGaussianParameters(Angle,Weight);
+            P.clg(j).theta = [];
+        else
+            pa = G(j,2);
+            U = reshape(poseData(:,pa,:),N,size(poseData,3));
+           %[Beta sigma] = FitLinearGaussianParameters(X, U) 
+           [BetaY sigmaY] = FitLinearGaussianParameters(Y, U,Weight);
+           [BetaX sigmaX] = FitLinearGaussianParameters(X, U,Weight);
+           [BetaA sigmaA] = FitLinearGaussianParameters(Angle, U,Weight);
+           P.clg(j).sigma_y(k) = sigmaY;
+           P.clg(j).sigma_x(k) = sigmaX;
+           P.clg(j).sigma_angle(k) = sigmaA;
+           P.clg(j).theta(k,:) = [BetaY(4) BetaY(1) BetaY(2) BetaY(3)...
+               BetaX(4) BetaX(1) BetaX(2) BetaX(3) BetaA(4) BetaA(1) BetaA(2) BetaA(3)];
+        end;
+    end;
+end;
+%loglikelihood = ComputeLogLikelihood(P, G, poseData);
+
+%fprintf('log likelihood: %f\n', loglikelihood);
+
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   % E-STEP to re-estimate ClassProb using the new parameters
@@ -65,19 +98,52 @@ for iter=1:maxIter
   % probability normalization in log space to avoid numerical issues
   
   ClassProb = zeros(N,K);
-  
+  LL=zeros(N,K);
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % YOUR CODE HERE
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+for i = 1:N
+    logProb = zeros(1,K);
+    for k = 1:K
+        logProb(k) = log(P.c(k)); 
+        for j = 1:size(poseData,2)
+            D=size(poseData,3);
+            pose=reshape(poseData(i,j,:),1,D);
+            
+            sigma=[P.clg(j).sigma_y(k) P.clg(j).sigma_x(k) P.clg(j).sigma_angle(k)];
+            if (G(j,1) == 0) 
+                mu=[P.clg(j).mu_y(k) P.clg(j).mu_x(k) P.clg(j).mu_angle(k)];
+                log_prob = -log(sigma*sqrt(2*pi))-(pose-mu).^2 ./ (2*sigma.^2);
+                logProb(k) = logProb(k) + sum(log_prob);
+                
+            else
+                pa = G(j,2);
+                mu_y = P.clg(j).theta(k,1) + P.clg(j).theta(k,2) * poseData(i,pa,1) + P.clg(j).theta(k,3) * poseData(i,pa,2) + P.clg(j).theta(k,4) * poseData(i,pa,3);
+                mu_x = P.clg(j).theta(k,5) + P.clg(j).theta(k,6) * poseData(i,pa,1) + P.clg(j).theta(k,7) * poseData(i,pa,2) + P.clg(j).theta(k,8) * poseData(i,pa,3);
+                mu_angle = P.clg(j).theta(k,9) + P.clg(j).theta(k,10) * poseData(i,pa,1) + P.clg(j).theta(k,11) * poseData(i,pa,2) + P.clg(j).theta(k,12) * poseData(i,pa,3);
+                mu=[mu_y mu_x mu_angle];
+                log_prob = -log(sigma*sqrt(2*pi))-(pose-mu).^2 ./ (2*sigma.^2);
+                logProb(k) = logProb(k) + sum(log_prob);
+            end;
+        end;
+
+    end;
+    ClassProb(i,:)=exp(logProb-logsumexp(logProb));
+    LL(i,:)=logProb;
+   
+   % loglikelihood = loglikelihood + log(sum(exp(logProb)));
+end;
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-  % Compute log likelihood of dataset for this iteration
+  % Compute log likelihood of poseData for this iteration
   % Hint: You should use the logsumexp() function here
   loglikelihood(iter) = 0;
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % YOUR CODE HERE
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+  loglikelihood(iter)=sum(logsumexp(LL));
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   

@@ -1,1 +1,5 @@
 Describe your method used to recognize the unknown actions here.
+
+The amount of data given are only 30; therefore, I use standard bootstrap method
+to incrase the training data, and average out P.transMatrix, P.clg, P.c obtained 
+from all the replications. With B=100 replications, 
